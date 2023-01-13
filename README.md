@@ -3,26 +3,27 @@ This is a simple stack-based interpreter that is capable of performing basic ari
 
 The NS scripting languages contains the following tools
 
-Push(value): pushes the value of x onto the stack
+- Push(value): pushes the value of x onto the stack
+- Plus():pops the last two values from the stack, adds them together, and pushes the result onto the stack
+- Mul(): multiplies the two top stack numbers
+- Div(): divide the two top stack numbers
+- Minus(): pops the last two values from the stack, subtracts the second popped value from the first, and pushes the result onto the stack
+- Print(x): prints an argument
+- StackCount(): Returns the Stack elements count
+- def(varName); Used to define a varible that can be used later (init to 0)
+- Set(varName, value): sets the value of the variable
+- Get(varName): returns the value of the variable
+- undef(varName): undefines the varible 
 
-Plus():pops the last two values from the stack, adds them together, and pushes the result onto the stack
-Mul(): multiplies the two top stack numbers
-Div(): divide the two top stack numbers
-Minus():pops the last two values from the stack, subtracts the second popped value from the first, and pushes the result onto the stack
-Print(x): prints an argument
-StackCount(): Returns the Stack elements count
-def(varName); Used to define a varible that can be used later (init to 0)
-Set(varName, value): sets the value of the variable
-Get(varName): returns the value of the variable
-undef(varName): undefines the varible 
 The interpreter also has the ability to skip the rest of a line at ("//", "#" and ";"), which are treated as comments.
 
-You can create a function using the underlying syntax
+You can create a function using the underlying syntax, it is all on a line to line basis
+Note* All functions can have 0-2 parameters with function overloading
 "
-AddOne(varName)
+AddOne(var)
 {
     // Example
-    Push(Get(varName))
+    Push(Get(var))
     Push(1)
     Plus()
 }
@@ -32,9 +33,9 @@ now if it contains a return statement at the end, it can return a value that oth
 if it returns a value, it has to be used as a parameter
 example
 "
-PlusVarWithOne(var1)
+PlusVarWithOne(var)
 {
-    Push(var1)
+    Push(Get(var))
     Push(1)
     Plus()
     return Pop()
