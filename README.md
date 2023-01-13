@@ -18,39 +18,62 @@ The NS scripting languages contains the following tools
 The interpreter also has the ability to skip the rest of a line at ("//", "#" and ";"), which are treated as comments.
 
 You can create a function using the underlying syntax, it is all on a line to line basis
+
 Note* All functions can have 0-2 parameters with function overloading
+
 "
+
 AddOne(var)
+
 {
+
     // Example
+    
     Push(Get(var))
+    
     Push(1)
+    
     Plus()
+    
 }
+
 "
 
 now if it contains a return statement at the end, it can return a value that other Functions can use
 if it returns a value, it has to be used as a parameter
+
 example
+
 "
+
 PlusVarWithOne(var)
+
 {
+
     Push(Get(var))
+    
     Push(1)
+    
     Plus()
+    
     return Pop()
+    
 }
+
 "
 
 You are also able to use if statements
 example
 "
+
 if (Pop() == 4)
 
 Print(4)
 
 endif
+
 "
+
 endif is used to indicate where to stop the scope
 
 To run the interpreter, simply run the script with a full path in source code because i don't know how to do it any other way :D
