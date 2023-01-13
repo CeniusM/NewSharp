@@ -1,0 +1,167 @@
+﻿add(x,y)
+{
+	Push(Get(x))
+	Push(Get(y))
+	Plus()
+}
+
+fib()
+{
+	_fib(x,y)
+	{
+		Print(Get(y))
+		add(Get(x), Get(y))
+		_fib(Get(y),Pop())
+	}
+
+	Print(1)
+	_fib(1,1)
+}
+
+fib()
+
+112
+221
+212
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//def(var1)
+//def(var2)
+//def(var3)
+//
+//Set(var1, 1)
+//Set(var2, 1)
+//Set(var3, -1)
+//
+//Fib()
+//{
+//Push(Get(var1))
+//Push(Get(var2))
+//Plus()
+//Set(var3, Pop())
+//Print(Get(var3))
+//Set(var1, Get(var2))
+//Set(var2, Get(var3))
+//Set(var3, 0) // not needed, just for comfort :D
+//Fib() // Do not have an end since we dont have if else ;( yet....    
+//	  # ;)
+//	  ; Comments ;)
+//}
+//
+//Fib()
+//
+//
+//def(x)
+//Set(x,3)
+//
+//AddX(foo)
+//{
+//Print(Get(x))
+//Push(Get(x))
+//Push(Get(foo))
+//Plus()
+//Set(x, Pop())
+//AddX(Get(x)) // Call Loop Again To Make It Go Around
+//}
+//
+//AddX(3)
+
+
+
+//def(x)
+//Set(x, 10)
+//
+//AddXPrint(para)
+//{
+//Print(Get(x))
+//Push(Get(x))
+//Push(Get(para))
+//Plus()
+//}
+//
+//AddXPrint(10)
+//AddXPrint(10)
+//AddXPrint(10)
+//AddXPrint(10)
+//AddXPrint(10)
+//AddXPrint(10)
+
+//
+//
+//def(x)
+//def(y)
+//Set(x, 10)
+//Set(y, 13)
+//
+//Push(Get(x))
+//Push(Get(y))
+//
+//Minus()
+//Print(Peek())
+//
+//Print(StackCount())
+//
+//
+//
+//AddOne(para)
+//{
+//Push(Get(para))
+//Push(1)
+//Plus()
+//}
+//
+//AddOne(3)
+//Print(Pop())
+//
+//AddOne(para1, para2)
+//{
+//Print(Get(para1))
+//Print(Get(para2))
+//}
+//
+//AddOne(3, 5)
+
