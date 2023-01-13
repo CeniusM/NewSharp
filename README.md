@@ -46,6 +46,7 @@ example
 
 "
 
+[
 PlusVarWithOne(var)
 
 {
@@ -59,6 +60,7 @@ PlusVarWithOne(var)
     return Pop()
     
 }
+]
 
 "
 
