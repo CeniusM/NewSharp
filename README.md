@@ -20,7 +20,7 @@ The interpreter also has the ability to skip the rest of a line at ("//", "#" an
 
 You can create a function using the underlying syntax, it is all on a line to line basis
 
-Note* All functions can have 0-2 parameters with function overloading
+Note* All functions can have [0,2] parameters with function overloading
 
 ```
 AddOne(var)
