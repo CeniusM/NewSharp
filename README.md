@@ -4,6 +4,7 @@ This is a simple stack-based interpreter that is capable of performing basic ari
 The NS scripting languages contains the following tools
 
 Push(value): pushes the value of x onto the stack
+
 Plus():pops the last two values from the stack, adds them together, and pushes the result onto the stack
 Mul(): multiplies the two top stack numbers
 Div(): divide the two top stack numbers
