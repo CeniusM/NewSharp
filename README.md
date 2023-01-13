@@ -9,6 +9,7 @@ The NS scripting languages contains the following tools
 - Div(): divide the two top stack numbers
 - Minus(): pops the last two values from the stack, subtracts the second popped value from the first, and pushes the result onto the stack
 - Print(x): prints an argument
+- Sleep(x): sleep for the given amount on ms
 - StackCount(): Returns the Stack elements count
 - def(varName); Used to define a varible that can be used later (init to 0)
 - Set(varName, value): sets the value of the variable
@@ -63,6 +64,7 @@ To run the interpreter, simply run the script with a full path in source code be
 ## Todo
 - [ ] Implement return
 - [ ] Implement if statements
+- [ ] Implement sleep function
 - [ ] Implement Read line to integer
 - [ ] Implement NewLine() and Write(num)
 - [ ] Implement undefine functions and varibles at end of scope
