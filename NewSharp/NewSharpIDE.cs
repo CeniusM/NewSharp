@@ -1,5 +1,7 @@
 ﻿
 
+using System.Diagnostics;
+
 namespace NewSharp;
 
 internal class NewSharpIDE
@@ -8,6 +10,13 @@ internal class NewSharpIDE
     private List<List<char>> _lines = new List<List<char>>();
     private string _filePath = "";
     private bool _running = false;
+    private bool _justPressedEsc = false;
+    private Stopwatch _timeAtPress = new Stopwatch();
+
+
+    private List<char> _clipBoard = new List<char>();
+    private (int X, int Y) _clipStart;
+    private (int X, int Y) _clipEnd;
 
 
     private int _xCursor = 0; // Corusponse both the the _lines xy + offset and the console xy
@@ -76,17 +85,28 @@ internal class NewSharpIDE
     private void _Environment()
     {
         _ReplaceNotValidCharecters();
+        Console.CursorVisible = false;
         _PrintScreen(); // If screen move
         while (_running)
         {
             _PrintLine(_yCursor + _lineOffSet); // If only line have changed
+            _PrintLine(_yCursor + _lineOffSet + 1); // To remove cursor background
+            _PrintLine(_yCursor + _lineOffSet - 1); // To remove cursor background
             if (_windowWidth != Console.WindowWidth || _windowHeight != Console.WindowHeight)
                 _PrintScreen();
+            if (_justPressedEsc)
+            {
+                Console.WriteLine("Double click ESC to quit aplication");
+            }
             var key = Console.ReadKey();
-
+            int lineY = _yCursor + _lineOffSet;
+            int lineX = _xCursor;
+            char c = key.KeyChar;
+            ConsoleKey keyVal = key.Key;
+            ConsoleModifiers keyMod = key.Modifiers;
             if (key.Key == ConsoleKey.RightArrow)
             {
-                if (_xCursor < _lines[_yCursor + _lineOffSet].Count - 1)
+                if (_xCursor < _lines[_yCursor + _lineOffSet].Count)
                     _xCursor += 1;
             }
             else if (key.Key == ConsoleKey.LeftArrow)
@@ -96,18 +116,66 @@ internal class NewSharpIDE
             }
             else if (key.Key == ConsoleKey.DownArrow)
             {
-                if (_xCursor < _lines.Count - 1)
+                if (_yCursor < _lines.Count - 1)
                     _yCursor += 1;
+                if (_xCursor > _lines[_yCursor + _lineOffSet].Count)
+                    _xCursor = _lines[_yCursor + _lineOffSet].Count;
             }
             else if (key.Key == ConsoleKey.UpArrow)
             {
                 if (_yCursor > 0)
                     _yCursor -= 1;
+                if (_xCursor > _lines[_yCursor + _lineOffSet].Count)
+                    _xCursor = _lines[_yCursor + _lineOffSet].Count;
             }
-            else if (key.KeyChar == '\n')
+            else if (key.Key == ConsoleKey.Enter)
             {
 
             }
+            else if (key.Key == ConsoleKey.Backspace)
+            {
+
+            }
+            else if (key.Key == ConsoleKey.Tab)
+            {
+
+            }
+            else if (key.Key == ConsoleKey.Escape)
+            {
+                if (_justPressedEsc && _timeAtPress.Elapsed.TotalMilliseconds < 300)
+                {
+
+                    _running = false;
+                    _CleanUp();
+                    return;
+                }
+                else
+                {
+                    _timeAtPress.Restart();
+                    _justPressedEsc = true;
+                    continue;
+                }
+            }
+            else
+            {
+                if (lineY > -1 && lineY < _lines.Count)
+                {
+                    if (lineX > -1 && lineX < _lines[lineY].Count)
+                    {
+                        _lines[lineY].Insert(lineX, key.KeyChar);
+                        lineX += 1;
+                    }
+                    else if (lineX == _lines[lineY].Count)
+                    {
+                        _lines[lineY].Add(key.KeyChar);
+                        lineX += 1;
+                    }
+                }
+
+            }
+
+            _timeAtPress.Stop();
+            _justPressedEsc = false;
         }
     }
 
@@ -147,8 +215,11 @@ internal class NewSharpIDE
 
     private void _PrintLine(int lineNum, bool clearLine = true)
     {
+        if (lineNum < 0 || lineNum > _lines.Count)
+            return;
         var line = _lines[lineNum];
         Console.ForegroundColor = ConsoleColor.Green;
+        Console.BackgroundColor = ConsoleColor.Black;
         if (clearLine)
         {
             Console.SetCursorPosition(0, lineNum);
@@ -157,12 +228,16 @@ internal class NewSharpIDE
         Console.SetCursorPosition(0, lineNum);
         Console.WriteLine(new string(line.ToArray()));
 
+        if (lineNum == _yCursor + _lineOffSet)
+        {
+            Console.SetCursorPosition(_xCursor, _yCursor);
+            Console.BackgroundColor = ConsoleColor.Gray;
+            if (_lines.Count > lineNum && _lines[lineNum].Count > _xCursor)
+                Console.Write(_lines[lineNum][_xCursor]);
+            else
+                Console.Write(' ');
+        }
         Console.SetCursorPosition(_xCursor, _yCursor);
-        Console.BackgroundColor = ConsoleColor.Black;
-        if (_lines.Count > _yCursor + _lineOffSet && _lines[_yCursor + _lineOffSet].Count > _xCursor)
-            Console.Write(_lines[_yCursor + _lineOffSet][_xCursor]);
-        else
-            Console.Write(' ');
         Console.ResetColor();
     }
 

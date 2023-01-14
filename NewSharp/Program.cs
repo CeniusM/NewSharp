@@ -1,22 +1,22 @@
 ﻿using NewSharp;
 
-NewSharpIDE ide = new NewSharpIDE();
-ide.Start("C:\\Users\\ceniu\\source\\repos\\NewSharp\\NewSharp\\MyProgram.NS");
+//NewSharpIDE ide = new NewSharpIDE();
+//ide.Start("C:\\Users\\ceniu\\source\\repos\\NewSharp\\NewSharp\\MyProgram.NS");
 
-//Interpreter programRunner = new Interpreter();
+Interpreter programRunner = new Interpreter();
 
-//string code = "";
-//try
-//{
-//    code = string.Join("\n", File.ReadAllLines("C:\\Users\\ceniu\\source\\repos\\NewSharp\\NewSharp\\MyProgram.NS"));
-//}
-//catch (Exception)
-//{
-//    Console.WriteLine("I use full path sorry, im not THAT good at programing");
-//    return;
-//    //throw;
-//}
+string code = "";
+try
+{
+    code = string.Join("\n", File.ReadAllLines("C:\\Users\\ceniu\\source\\repos\\NewSharp\\NewSharp\\MyProgram.NS"));
+}
+catch (Exception)
+{
+    Console.WriteLine("I use full path sorry, im not THAT good at programing");
+    return;
+    //throw;
+}
 
-//programRunner.RunCode(code);
+programRunner.RunCode(code);
 
-//Console.ReadLine();
+Console.ReadLine();
