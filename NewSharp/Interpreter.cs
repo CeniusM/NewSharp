@@ -18,6 +18,12 @@ public class Interpreter
 
     private List<int> Varibles = new List<int>();
 
+    private int[] Array1 = new int[262144]; // 1 MB worth of ints
+
+    //private int[,] Array2 = new int[512, 512]; // 1 MB worth of 2d ints
+
+    //private int[,,] Array3 = new int[64, 64, 64]; // 1 MB worth of 3d ints
+
     private Stack<int> Stack = new Stack<int>();
 
     private List<string> LinesInput = new List<string>();
@@ -46,6 +52,20 @@ public class Interpreter
         BuildIn.Add(("StopTimer", 0, false), __STOPTIMER);
         BuildIn.Add(("Rand", 2, true), __RAND);
         BuildIn.Add(("ReadKey", 0, true), __READKEY);
+        BuildIn.Add(("Array1", 2, false), __ARRAY1SET);
+        BuildIn.Add(("Array1", 1, true), __ARRAY1GET);
+    }
+
+    private int __ARRAY1GET(int var1, int foo2)
+    {
+        return Array1[var1];
+    }
+
+    private int __ARRAY1SET(int var1, int var2)
+    {
+        //SetErrorIf(var1 < 0 || var1 > Array.Length - 1, );
+        Array1[var1] = var2;
+        return 0;
     }
 
     private int __READKEY(int foo1, int foo2)
@@ -328,18 +348,15 @@ public class Interpreter
 
         //SetErrorIf(commasCount < 0, lineOffSet, "There can not be less than 0 parameters"); // HOW WOULD THIS BE POSSIBLE
         string[] names = new string[0];
-        if (splitAtComma)
+        if (splitAtComma && index != -1)
         {
-            if (index != -1)
-            {
-                // IM LOSING MY MIND
-                //str[index] = (char)24;
-                // Idc anymore after 900 lines of code, efficiency is my last priority for now
-                StringBuilder tempStr = new StringBuilder(str);
-                tempStr[index] = (char)24;
-                str = tempStr.ToString();
-                names = str.Split((char)24);
-            }
+            // IM LOSING MY MIND
+            //str[index] = (char)24;
+            // Idc anymore after 900 lines of code, efficiency is my last priority for now
+            StringBuilder tempStr = new StringBuilder(str);
+            tempStr[index] = (char)24;
+            str = tempStr.ToString();
+            names = str.Split((char)24);
         }
         else
             names = new string[1] { str };
@@ -494,7 +511,7 @@ public class Interpreter
                 scopeDepth++;
             else if (lines[i].Contains('}'))
             {
-                    scopeDepth--;
+                scopeDepth--;
                 if (scopeDepth == 0)
                 {
                     ended = true;
@@ -595,7 +612,7 @@ public class Interpreter
                 if (DoesStringContain(lines[i], "if", 0))
                     i += IfStatement(lines, i);
                 else if (string.Join("", lines[i].Take(6)) == "return")
-                    return RunFunction(string.Join("", lines[i].TakeLast(lines[i].Length - 6)), i, true);
+                    return GetValuesFromParameters(string.Join("", lines[i].TakeLast(lines[i].Length - 6)), i)[0];
                 else if (SearchForCurly(lines, i))
                     i += DefFunction(lines, i, linesOffSet);
                 else if (string.Join("", lines[i].Take(3)) == "def")
@@ -608,7 +625,7 @@ public class Interpreter
                 // return false;
                 //}
                 else
-                     RunFunction(lines[i], i + linesOffSet, false);
+                    RunFunction(lines[i], i + linesOffSet, false);
             }
             catch (Exception e)
             {
@@ -856,7 +873,8 @@ public class Interpreter
             else if (DoesStringContain(lines[i], "return", 0))
             {
                 FuncLines.Add(lines[i]);
-                foundReturn = true;
+                if (depth == 1)
+                    foundReturn = true;
             }
             else
             {

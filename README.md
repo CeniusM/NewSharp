@@ -21,6 +21,7 @@ The NS scripting languages contains the following tools
 - StartTimer(): Start/Restarts the build in stopwatch
 - StopTimer(): Stops the build in stopwatch and pushes the time in miliseconds on top of the stack
 - Rand(low, heigh): Returns a value random number [low, heigh] 
+- ReadKey(): returns the next client key input
 
 The interpreter also has the ability to skip the rest of a line at ("//", "#" and ";"), which are treated as comments.
 
