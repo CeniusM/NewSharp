@@ -1,4 +1,5 @@
 ﻿def(player) // 1 for player 1, and 2 for player 2
+Set(player, 1)
 
 // Board fields from top left to top right, and then next row etc
 // 0: No player
@@ -14,34 +15,90 @@ def(x7)
 def(x8)
 def(x9)
 
-has_3_in_a_row(sPlayer)
+has_3_in_a_row(_player)
 {
-  if x1 == sPlayer
+  if x1 == _player
   {
     if x1 == x2
     {
       if x2 == x3
       {
-        Print("Yeah!")
+        PrintText("Yeah! Someone just won the game!")
         return 1
-        }
       }
     }
+  }
   return 0
 }
 
-Set(player, 1)
-def(y)
-Set(y, has_3_in_a_row(player))
+exit()
+{
+  PrintText("Exiting program")
+  failhere...
+}
 
-Print(y)
-//undef(y)
+select_position(_player, _position)
+{
+  if _position == 1
+  {
+    if x1 == 0
+    {
+      Set(x1, _player)
+      return
+    }
+    PrintText("Doh! Field has already been taken by player ")
+    Print(_player)
+    NewLine()
+    exit()
+  }
+}
+
+print_board()
+{
+  PrintTextLine("========= BOARD ==========")
+  Print(x1)
+  Print(x2)
+  PrintLine(x3)
+  Print(x4)
+  Print(x5)
+  PrintLine(x6)
+  Print(x7)
+  Print(x8)
+  PrintLine(x9)
+  PrintTextLine("===========================")
+  PrintText("It is the turn of player")
+  PrintLine(player)
+}
+
+play()
+{
+  print_board()
+  PrintText("Player 1 (select field 1-9): ")
+
+  def(position)
+  Set(position, ReadKey())
+  select_position(player, position)
+
+  def(y)
+  Set(y, has_3_in_a_row(player))
+  Print(y)
+
+  print_board()
+
+  play()
+}
+
+play()
 
 
-Set(player, 0)
-Set(y, has_3_in_a_row(player))
 
-Print(y)
+
+
+
+
+
+
+
 
 
 

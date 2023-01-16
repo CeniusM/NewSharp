@@ -496,11 +496,11 @@ public class Interpreter
     /// <summary>
     /// Searches for brackets on current and next lines, if returns true, that can be used to say a function is declaring a function
     /// </summary>
-    private bool SearchForCurly(List<string> lines, int lineIndex)
+    private bool SearchForCurly(List<string> lines, int lineIndex, int scopeOffSet)
     {
         if (lines[lineIndex].Contains('{'))
         {
-            SetErrorIf(lines[lineIndex][0] == '{', lineIndex, "Can not have a scope that isent used with a method declaration");
+            SetErrorIf(lines[lineIndex][0] == '{', lineIndex + scopeOffSet, "Can not have a scope that isent used with a method declaration");
             return true;
         }
         else if (lines.Count > lineIndex + 1)
@@ -629,12 +629,12 @@ public class Interpreter
                     i += IfStatement(lines, i, linesOffSet + i);
                 else if (string.Join("", lines[i].Take(6)) == "return")
                     return GetValuesFromParameters(string.Join("", lines[i].TakeLast(lines[i].Length - 6)), i)[0];
-                else if (SearchForCurly(lines, i))
+                else if (SearchForCurly(lines, i, linesOffSet))
                     i += DefFunction(lines, i, linesOffSet);
                 else if (string.Join("", lines[i].Take(3)) == "def")
-                    DefVarible(lines, i);
+                    DefVarible(lines, i + linesOffSet);
                 else if (string.Join("", lines[i].Take(5)) == "undef")
-                    UnDefVarible(lines, i);
+                    UnDefVarible(lines, i + linesOffSet);
                 //else if (IsFunctionCall)
                 //{
                 //if (!RunLines(NameFunc[FuncName].List, NameFunc[FuncName].OffSet))
