@@ -37,6 +37,8 @@ public class Interpreter
 
     public Interpreter()
     {
+        BuildIn.Add(("MoveCursor", 2, false), __MOVECURSOR);
+        BuildIn.Add(("SetCursor", 2, false), __SETCURSOR);
         BuildIn.Add(("Print", 1, false), __PRINT);
         BuildIn.Add(("PrintLine", 1, false), __PRINTLINE);
         BuildIn.Add(("NewLine", 0, false), __NEWLINE);
@@ -56,6 +58,19 @@ public class Interpreter
         BuildIn.Add(("ReadKey", 0, true), __READKEY);
         BuildIn.Add(("Array1", 2, false), __ARRAY1SET);
         BuildIn.Add(("Array1", 1, true), __ARRAY1GET);
+    }
+
+    private int __MOVECURSOR(int var1, int var2)
+    {
+        var pos = Console.GetCursorPosition();
+        Console.SetCursorPosition(pos.Left + var1, pos.Top + var2);
+        return 0;
+    }
+
+    private int __SETCURSOR(int var1, int var2)
+    {
+        Console.SetCursorPosition(var1, var2);
+        return 0;
     }
 
     private int __NEWLINE(int foo1, int foo2)
@@ -622,19 +637,24 @@ public class Interpreter
             try
             {
                 // Testing
-                //if (i == 41)
-                //    Console.WriteLine();
+                if (i == 1 && linesOffSet == 74)
+                    Console.Write("");
 
                 if (DoesStringContain(lines[i], "if", 0))
                     i += IfStatement(lines, i, linesOffSet + i);
                 else if (string.Join("", lines[i].Take(6)) == "return")
-                    return GetValuesFromParameters(string.Join("", lines[i].TakeLast(lines[i].Length - 6)), i)[0];
+                {
+                    var temp = GetValuesFromParameters(string.Join("", lines[i].TakeLast(lines[i].Length - 6)), i);
+                    if (temp.Length == 0)
+                        return 0;
+                    return temp[0];
+                }
                 else if (SearchForCurly(lines, i, linesOffSet))
                     i += DefFunction(lines, i, linesOffSet);
                 else if (string.Join("", lines[i].Take(3)) == "def")
-                    DefVarible(lines, i + linesOffSet);
+                    DefVarible(lines, i, linesOffSet);
                 else if (string.Join("", lines[i].Take(5)) == "undef")
-                    UnDefVarible(lines, i + linesOffSet);
+                    UnDefVarible(lines, i, linesOffSet);
                 //else if (IsFunctionCall)
                 //{
                 //if (!RunLines(NameFunc[FuncName].List, NameFunc[FuncName].OffSet))
@@ -651,7 +671,7 @@ public class Interpreter
                     PrintError(lines, messageSplit[1], var);
                 else
                 {
-                    Console.WriteLine("ERROR AT " + linesOffSet + ", " + i);
+                    Console.WriteLine("ERROR AT " + i + ", " + linesOffSet);
                     throw;
                 }
                 return int.MinValue;
@@ -667,26 +687,26 @@ public class Interpreter
         return int.MinValue;
     }
 
-    private void DefVarible(List<string> lines, int lineOffSet)
+    private void DefVarible(List<string> lines, int lineOffSet, int scopeOffSet)
     {
         string line = lines[lineOffSet];
-        SetErrorIf(line[3] != '(', lineOffSet, "Incorrect syntax, must use \"def(name)\"");
+        SetErrorIf(line[3] != '(', lineOffSet + scopeOffSet, "Incorrect syntax, must use \"def(name)\"");
         string name = string.Join("", line.Take(new Range(4, line.Length - 1)));
-        SetErrorIf(line[3] != '(', lineOffSet, "Incorrect syntax, must use \"def(name)\"");
+        SetErrorIf(line[3] != '(', lineOffSet + scopeOffSet, "Incorrect syntax, must use \"def(name)\"");
 
         ValidateName(name, lineOffSet);
-        SetErrorIf(NameVaribleIndex.ContainsKey(name), lineOffSet, "Varible has already been defined ");
+        SetErrorIf(NameVaribleIndex.ContainsKey(name), lineOffSet + scopeOffSet, "Varible has already been defined ");
 
         Varibles.Add(0);
         NameVaribleIndex.Add(name, Varibles.Count - 1);
     }
 
-    private void UnDefVarible(List<string> lines, int lineOffSet)
+    private void UnDefVarible(List<string> lines, int lineOffSet, int scopeOffSet)
     {
         string line = lines[lineOffSet];
-        SetErrorIf(line[5] != '(', lineOffSet, "Incorrect syntax, must use \"undef(name)\"");
+        SetErrorIf(line[5] != '(', lineOffSet + scopeOffSet, "Incorrect syntax, must use \"undef(name)\"");
         string name = string.Join("", line.Take(new Range(6, line.Length - 1)));
-        SetErrorIf(line[5] != '(', lineOffSet, "Incorrect syntax, must use \"undef(name)\"");
+        SetErrorIf(line[5] != '(', lineOffSet + scopeOffSet, "Incorrect syntax, must use \"undef(name)\"");
 
         ValidateName(name, lineOffSet);
         //SetErrorIf(!NameVaribleIndex.ContainsKey(name), lineOffSet, "Varible has not been defined");
@@ -872,6 +892,7 @@ public class Interpreter
          */
         int depth = 0;
         bool foundReturn = false;
+        //bool returnNothing = false;
         //if (lines[lineOffSet].Contains('{'))
         //    depth++;
 
@@ -899,6 +920,8 @@ public class Interpreter
                 if (depth == 0)
                 {
                     // End
+                    //if (returnNothing)
+                    //    foundReturn = false;
                     NameFunc.Add((Name, str.Length, foundReturn), (FuncLines, lineOffSet + scopeOffSet));
                     return FuncLines.Count - 1;
                 }
@@ -907,7 +930,11 @@ public class Interpreter
             {
                 FuncLines.Add(lines[i]);
                 if (depth == 1)
+                {
                     foundReturn = true;
+                    if (lines[i] == "return")
+                        foundReturn = false;
+                }
             }
             else
             {

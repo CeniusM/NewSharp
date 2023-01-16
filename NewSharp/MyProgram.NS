@@ -15,6 +15,8 @@ def(x7)
 def(x8)
 def(x9)
 
+def(lastMove)
+
 has_3_in_a_row(_player)
 {
   if x1 == _player
@@ -55,6 +57,8 @@ select_position(_player, _position)
 
 print_board()
 {
+  //Clear()
+  SetCursor(0,0)
   PrintTextLine("========= BOARD ==========")
   Print(x1)
   Print(x2)
@@ -66,25 +70,41 @@ print_board()
   Print(x8)
   PrintLine(x9)
   PrintTextLine("===========================")
-  PrintText("It is the turn of player")
-  PrintLine(player)
+}
+
+next_player()
+{
+  if player == 1
+  {
+    Set(player, 2)
+    return
+  }
+  Set(player, 1)
 }
 
 play()
 {
   print_board()
-  PrintText("Player 1 (select field 1-9): ")
+
+  PrintText("Player ")
+  Print(player)
+  PrintTextLine(" (select field 1-9):  ")
+  //Print(lastMove)
+  SetCursor(25,5)
+
 
   def(position)
   Set(position, ReadKey())
+  //Set(lastMove, position)
+  PrintTextLine("")
   select_position(player, position)
+  undef(position)
 
   def(y)
   Set(y, has_3_in_a_row(player))
-  Print(y)
+  undef(y)
 
-  print_board()
-
+  next_player()
   play()
 }
 
