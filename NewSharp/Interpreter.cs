@@ -755,6 +755,17 @@ public class Interpreter
             Console.Write(string.Join("", parameters[0].Take(new Range(1, parameters[0].Length - 1)))); ;
             return 0;
         }
+        else if (FuncName == "PrintTextLine")
+        {
+            SetErrorIf(excpectReturn, lineOffSet, "The PrintTextLine() Function can not return a value");
+            string[] parameters = GetParameterNames(line, lineOffSet, false, false);
+            SetErrorIf(parameters.Length != 1, lineOffSet, "Incorrect parameters, example PrintTextLine(\"Hello world\")");
+            SetErrorIf(parameters[0].Length < 2, lineOffSet, "Incorrect parameters, example PrintTextLine(\"Hello world\")");
+            SetErrorIf(parameters[0][0] != '\"', lineOffSet, "Incorrect parameters, example PrintTextLine(\"Hello world\")");
+            SetErrorIf(parameters[0][parameters[0].Length - 1] != '\"', lineOffSet, "Incorrect parameters, example PrintTextLine(\"Hello world\")");
+            Console.WriteLine(string.Join("", parameters[0].Take(new Range(1, parameters[0].Length - 1)))); ;
+            return 0;
+        }
         //else if(FuncName == "Print")
 
 
