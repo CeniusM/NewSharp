@@ -1,7 +1,12 @@
-﻿using NewSharp;
+﻿//#define RunIDEThingy
 
-//NewSharpIDE ide = new NewSharpIDE();
-//ide.Start("C:\\Users\\ceniu\\source\\repos\\NewSharp\\NewSharp\\MyProgram.NS");
+using NewSharp;
+
+#if RunIDEThingy
+NewSharpIDE ide = new NewSharpIDE();
+ide.Start("C:\\Users\\ceniu\\source\\repos\\NewSharp\\NewSharp\\MyProgram.NS");
+
+#else
 
 Interpreter programRunner = new Interpreter();
 
@@ -20,3 +25,5 @@ catch (Exception)
 programRunner.RunCode(code);
 
 Console.ReadLine();
+
+#endif

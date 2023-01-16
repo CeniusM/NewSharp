@@ -32,6 +32,20 @@ public class Interpreter
         BuildIn.Add(("Mul", 0, false), __MUL);
         BuildIn.Add(("Div", 0, false), __DIV);
         BuildIn.Add(("StackCount", 0, true), __STACKCOUNT);
+        BuildIn.Add(("Sleep", 1, false), __SLEEP);
+        BuildIn.Add(("Clear", 0, false), __CLEAR);
+    }
+
+    private int __CLEAR(int foo1, int foo2)
+    {
+        Console.Clear();
+        return 0;
+    }
+
+    private int __SLEEP(int var1, int foo2)
+    {
+        Thread.Sleep(var1);
+        return 0;
     }
 
     private int __MUL(int foo1, int foo2)
@@ -93,10 +107,59 @@ public class Interpreter
         return 0;
     }
 
+    private bool DoesStringContain(string input, string match, int offset)
+    {
+        return string.Join("", input.Take(new Range(offset, match.Length + offset))) == match;
+        //return false;
+    }
+
     private string RemoveEmpty(string code)
     {
+        // Must ignore
+        // PrintText("This part of the input")
+
+        StringBuilder newStr = new StringBuilder(code);
+        int funcLength = "PrintText(\"".Length;
+
+        int lastIndex = 0;
+        while (true)
+        {
+            // Change out the spaces with random non used char like 24(cancel) in ascii
+            // * 25 for '\t'
+            int index = code.IndexOf("PrintText(\"", lastIndex);
+            int endIndex = code.IndexOf("\")", index + funcLength);
+            if (index == -1 || endIndex == -1)
+                break;
+
+            lastIndex = endIndex;
+
+            for (int i = index; i < endIndex; i++)
+            {
+                if (newStr[i] == ' ')
+                    newStr[i] = (char)24;
+                else if (newStr[i] == '\t')
+                    newStr[i] = (char)25;
+            }
+        }
+
+        newStr = newStr.Replace(" ", "");
+        newStr = newStr.Replace("\t", "");
+        newStr = newStr.Replace((char)24, ' ');
+        newStr = newStr.Replace((char)25, '\t');
+        return newStr.ToString();
+
+        //bool doingText = false;
+        //for (int i = 0; i < code.Length; i++)
+        //{
+        //    char c = code[i];
+        //    if ()
+        //}
+
+
+
+
         // Later it is important to throw error if the name is using spaces
-        return code.Replace(" ", "").Replace("\t", "");
+        //return code.Replace(" ", "").Replace("\t", "");
     }
 
     private List<string> GetLines(string code)
@@ -201,7 +264,7 @@ public class Interpreter
     /// 
     /// }
     /// </summary>
-    private string[] GetParameterNames(string line, int lineOffSet, bool validateNames = true)
+    private string[] GetParameterNames(string line, int lineOffSet, bool validateNames = true, bool splitAtComma = true)
     {
         SetErrorIf(!(line.Contains('(') && line.Contains(')')), lineOffSet, "Function does not contain parameters");
         string str = line.Split('(', 2)[1];
@@ -209,7 +272,11 @@ public class Interpreter
         int commasCount = str.Count(x => x == ',');
         SetErrorIf(commasCount > 1, lineOffSet, "There can not be more than 2 parameters");
         //SetErrorIf(commasCount < 0, lineOffSet, "There can not be less than 0 parameters"); // HOW WOULD THIS BE POSSIBLE
-        string[] names = str.Split(',');
+        string[] names = new string[0];
+        if (splitAtComma)
+            names = str.Split(',');
+        else
+            names = new string[1] { str };
         if (names.Length == 1)
             if (names[0] == "")
                 return new string[0];
@@ -256,8 +323,9 @@ public class Interpreter
                 var2.Append(parameter[i]);
             else
                 var1.Append(parameter[i]);
-
-            if (MethodDepth != 0)
+            if (parameter[i] == '(')
+                MethodDepth++;
+            else if (MethodDepth != 0)
             {
                 //if (Parameter2)
                 //    var2.Append(parameter[i]);
@@ -272,9 +340,9 @@ public class Interpreter
                 {
                     int result = 0;
                     if (Parameter2)
-                        result = RunMethod(var2.ToString(), lineOffSet, true);
+                        result = RunFunction(var2.ToString(), lineOffSet, true);
                     else
-                        result = RunMethod(var1.ToString(), lineOffSet, true);
+                        result = RunFunction(var1.ToString(), lineOffSet, true);
                     if (Parameter2)
                         var2 = new StringBuilder("" + result);
                     else
@@ -282,8 +350,6 @@ public class Interpreter
                 }
 
             }
-            else if (parameter[i] == '(')
-                MethodDepth++;
             else if (parameter[i] == ',')
             {
                 var1.Remove(var1.Length - 1, 1);
@@ -347,8 +413,14 @@ public class Interpreter
     /// </summary>
     /// <param name="lines"></param>
     /// <param name="line"></param>
-    private void IfStatement(List<string> lines, ref int line)
+    private int IfStatement(List<string> lines, int line)
     {
+        int scopeDepth = 0;
+        for (int i = line; i < lines.Count; i++)
+        {
+
+        }
+        return scopeDepth;
         // if true...
 
 
@@ -376,10 +448,10 @@ public class Interpreter
                 if (lines[i] == "Push(Get(var2))")
                     DEBUG.Print("");
 
-                if (lines[i][0] == 'i' && lines[i][1] == 'f')
-                    IfStatement(lines, ref i);
+                if (DoesStringContain(lines[i], "if", 0))
+                    i += IfStatement(lines, i);
                 else if (string.Join("", lines[i].Take(6)) == "return")
-                    return RunMethod(string.Join("", lines[i].TakeLast(lines[i].Length - 7).TakeWhile(x => x != ')')), i, true);
+                    return RunFunction(string.Join("", lines[i].TakeLast(lines[i].Length - 6)), i, true);
                 else if (SearchForCurly(lines, i))
                     i += DefFunction(lines, i, linesOffSet);
                 else if (string.Join("", lines[i].Take(3)) == "def")
@@ -392,7 +464,7 @@ public class Interpreter
                 // return false;
                 //}
                 else
-                    RunMethod(lines[i], i + linesOffSet, false);
+                    RunFunction(lines[i], i + linesOffSet, false);
             }
             catch (Exception e)
             {
@@ -446,9 +518,13 @@ public class Interpreter
         }
     }
 
-    private int RunMethod(string line, int lineOffSet, bool excpectReturn)
+    private int RunFunction(string line, int lineOffSet, bool excpectReturn)
     {
         // Test
+        string[] testStr = line.Split('(', 2);
+        if (!line.Contains('(') || !line.Contains(')') || testStr[1][testStr[1].Length - 1] != ')')
+            Console.WriteLine();
+
         SetErrorIf(!line.Contains('('), lineOffSet, "Incorrect parameters");
         SetErrorIf(!line.Contains(')'), lineOffSet, "Incorrect parameters");
         string[] str = line.Split('(', 2);
@@ -459,6 +535,7 @@ public class Interpreter
 
         if (FuncName == "Set")
         {
+            SetErrorIf(excpectReturn, lineOffSet, "The Set() Function can not return a value");
             string[] parameters = GetParameterNames(line, lineOffSet, false);
             SetErrorIf(parameters.Length != 2, lineOffSet, "Incorrect parameters, example \"Set(name, 100)\"");
             string varName = parameters[0];
@@ -478,12 +555,25 @@ public class Interpreter
         }
         else if (FuncName == "Get")
         {
+            SetErrorIf(!excpectReturn, lineOffSet, "The Get() Function need to return a value");
             string[] parameters = GetParameterNames(line, lineOffSet, false);
             SetErrorIf(parameters.Length != 1, lineOffSet, "Incorrect parameters, example \"Get(name)\"");
             string varName = parameters[0];
             SetErrorIf(!NameVaribleIndex.ContainsKey(varName), lineOffSet, $"The varible {varName} does not exist");
             return Varibles[NameVaribleIndex[varName]];
         }
+        else if (FuncName == "PrintText")
+        {
+            SetErrorIf(excpectReturn, lineOffSet, "The PrintText() Function can not return a value");
+            string[] parameters = GetParameterNames(line, lineOffSet, false, false);
+            SetErrorIf(parameters.Length != 1, lineOffSet, "Incorrect parameters, example PrintText(\"Hello world\")");
+            SetErrorIf(parameters[0].Length < 2, lineOffSet, "Incorrect parameters, example PrintText(\"Hello world\")");
+            SetErrorIf(parameters[0][0] != '\"', lineOffSet, "Incorrect parameters, example PrintText(\"Hello world\")");
+            SetErrorIf(parameters[0][parameters[0].Length - 1] != '\"', lineOffSet, "Incorrect parameters, example PrintText(\"Hello world\")");
+            Console.WriteLine(string.Join("",parameters[0].Take(new Range(1, parameters[0].Length - 1))));;
+            return 0;
+        }
+
 
         int[] Parameters = GetValuesFromParameters(str[1], lineOffSet);
 
@@ -495,7 +585,18 @@ public class Interpreter
         int value = 0;
 
         if (BuildIn.ContainsKey(key))
-            return BuildIn[key].Invoke(var1, var2);
+        {
+            try
+            {
+                return BuildIn[key].Invoke(var1, var2);
+            }
+            catch (InvalidOperationException e)
+            {
+                //SetErrorIf(e.Message == "Stack empty.", lineOffSet, "StackUnderflow");
+                SetError(lineOffSet, "StackUnderflow");
+                throw;
+            }
+        }
         else if (NameFunc.ContainsKey(key))
         {
             string[] tempFunctions = new string[NameFunc[key].Func.Count];
@@ -575,6 +676,7 @@ public class Interpreter
          * 
          */
         int depth = 0;
+        bool foundReturn = false;
         //if (lines[lineOffSet].Contains('{'))
         //    depth++;
 
@@ -602,12 +704,20 @@ public class Interpreter
                 if (depth == 0)
                 {
                     // End
-                    NameFunc.Add((Name, str.Length, false), (FuncLines, lineOffSet + scopeOffSet));
+                    NameFunc.Add((Name, str.Length, foundReturn), (FuncLines, lineOffSet + scopeOffSet));
                     return FuncLines.Count;
                 }
             }
-            else
+            else if (DoesStringContain(lines[i], "return", 0))
+            {
                 FuncLines.Add(lines[i]);
+                foundReturn = true;
+            }
+            else
+            {
+                SetErrorIf(foundReturn && lines[i] != "", lineOffSet + scopeOffSet + i, "Can not have code that runs after a return statement");
+                FuncLines.Add(lines[i]);
+            }
         }
 
         SetError(lineOffSet, "Function does not have an end");

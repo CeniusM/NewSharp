@@ -156,6 +156,19 @@ internal class NewSharpIDE
                     continue;
                 }
             }
+            else if (keyVal == ConsoleKey.Oem2 && keyMod == ConsoleModifiers.Control)
+            {
+                if (_lines[lineY].Count > 1 && _lines[lineY][0] == '/' && _lines[lineY][1] == '/')
+                {
+                    _lines[lineY].RemoveAt(0);
+                    _lines[lineY].RemoveAt(0);
+                }
+                else
+                {
+                    _lines[lineY].Insert(0, '/');
+                    _lines[lineY].Insert(0, '/');
+                }
+            }
             else
             {
                 if (lineY > -1 && lineY < _lines.Count)

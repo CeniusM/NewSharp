@@ -3,6 +3,8 @@
 	Push(Get(x))
 	Push(Get(y))
 	Plus()
+	return Pop()
+	//Pop() // <-- Cant run code after a return statement
 }
 
 fib()
@@ -10,13 +12,17 @@ fib()
 	_fib(x,y)
 	{
 		Print(Get(y))
-		add(Get(x), Get(y))
-		_fib(Get(y),Pop())
+		//add(Get(x), Get(y))
+		Sleep(500)
+		_fib(Get(y),add(Get(x),Get(y)))
 	}
 
 	Print(1)
 	_fib(1,1)
 }
+
+PrintText("Hej ""(	)  \"    \"med dig")
+//Print(Pop())
 
 fib()
 
