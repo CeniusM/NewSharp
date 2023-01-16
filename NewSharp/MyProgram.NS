@@ -14,9 +14,9 @@ def(x7)
 def(x8)
 def(x9)
 
-has_3_in_a_row(player)
+has_3_in_a_row(sPlayer)
 {
-  if x1 == player
+  if x1 == sPlayer
   {
     if x1 == x2
     {

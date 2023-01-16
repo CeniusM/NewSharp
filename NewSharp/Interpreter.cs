@@ -38,6 +38,8 @@ public class Interpreter
     public Interpreter()
     {
         BuildIn.Add(("Print", 1, false), __PRINT);
+        BuildIn.Add(("PrintLine", 1, false), __PRINTLINE);
+        BuildIn.Add(("NewLine", 0, false), __NEWLINE);
         BuildIn.Add(("Pop", 0, true), __POP);
         BuildIn.Add(("Peek", 0, true), __PEEK);
         BuildIn.Add(("Push", 1, false), __PUSH);
@@ -54,6 +56,12 @@ public class Interpreter
         BuildIn.Add(("ReadKey", 0, true), __READKEY);
         BuildIn.Add(("Array1", 2, false), __ARRAY1SET);
         BuildIn.Add(("Array1", 1, true), __ARRAY1GET);
+    }
+
+    private int __NEWLINE(int foo1, int foo2)
+    {
+        Console.WriteLine();
+        return 0;
     }
 
     private int __ARRAY1GET(int var1, int foo2)
@@ -125,6 +133,12 @@ public class Interpreter
     }
 
     private int __PRINT(int var1, int foo2)
+    {
+        Console.Write(var1);
+        return 0;
+    }
+
+    private int __PRINTLINE(int var1, int foo2)
     {
         Console.WriteLine(var1);
         return 0;
@@ -608,6 +622,8 @@ public class Interpreter
             try
             {
                 // Testing
+                //if (i == 41)
+                //    Console.WriteLine();
 
                 if (DoesStringContain(lines[i], "if", 0))
                     i += IfStatement(lines, i, linesOffSet + i);
@@ -634,7 +650,10 @@ public class Interpreter
                 if (int.TryParse(messageSplit[0], out int var) && messageSplit.Length == 2)
                     PrintError(lines, messageSplit[1], var);
                 else
+                {
+                    Console.WriteLine("ERROR AT " + linesOffSet + ", " + i);
                     throw;
+                }
                 return int.MinValue;
             }
         }
@@ -733,7 +752,7 @@ public class Interpreter
             SetErrorIf(parameters[0].Length < 2, lineOffSet, "Incorrect parameters, example PrintText(\"Hello world\")");
             SetErrorIf(parameters[0][0] != '\"', lineOffSet, "Incorrect parameters, example PrintText(\"Hello world\")");
             SetErrorIf(parameters[0][parameters[0].Length - 1] != '\"', lineOffSet, "Incorrect parameters, example PrintText(\"Hello world\")");
-            Console.WriteLine(string.Join("", parameters[0].Take(new Range(1, parameters[0].Length - 1)))); ;
+            Console.Write(string.Join("", parameters[0].Take(new Range(1, parameters[0].Length - 1)))); ;
             return 0;
         }
         //else if(FuncName == "Print")
