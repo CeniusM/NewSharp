@@ -567,7 +567,7 @@ public class Interpreter
 
         if (statementIsTrue)
         {
-            var newLines = lines.Take(new Range(lineNum + 1, lineNum + 1 + scopeLength)).ToList();
+            var newLines = lines.Take(new Range(lineNum + 2, lineNum + scopeLength)).ToList();
             RunLinesInScope(newLines, lineNum + 1, true);
         }
 
@@ -608,7 +608,7 @@ public class Interpreter
                 // return false;
                 //}
                 else
-                    RunFunction(lines[i], i + linesOffSet, false);
+                     RunFunction(lines[i], i + linesOffSet, false);
             }
             catch (Exception e)
             {

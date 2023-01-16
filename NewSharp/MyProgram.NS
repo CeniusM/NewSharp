@@ -10,10 +10,12 @@
 // Loop that counts from 0 to 10
 Loop(start, end)
 {
+	if start < end
+	{
 	Print(start)
 	Set(start, Add(start, 1))
 	Loop(start, end)
-
+	}
 }
 Loop(0, 50)
 
