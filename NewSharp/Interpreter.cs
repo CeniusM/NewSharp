@@ -884,7 +884,7 @@ public class Interpreter
         //Lines = RemoveEmptyLines(Lines); // Dont remove beacous then you cant show errors on the correct line
         Lines = RemoveComments(Lines);
 
-        DEBUG.Print(Lines);
+        //DEBUG.Print(Lines);
 
         RunLinesInScope(Lines, 0, false);
 
