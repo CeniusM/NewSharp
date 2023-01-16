@@ -1,34 +1,23 @@
-﻿add(x,y)
+﻿Add(x,y)
 {
-	Push(Get(x))
-	Push(Get(y))
+	Push(x)
+	Push(y)
 	Plus()
 	return Pop()
 	//Pop() // <-- Cant run code after a return statement
 }
 
-fib()
+// Loop that counts from 0 to 10
+Loop(start, end)
 {
-	_fib(x,y)
-	{
-		Print(Get(y))
-		//add(Get(x), Get(y))
-		Sleep(500)
-		_fib(Get(y),add(Get(x),Get(y)))
-	}
+	Print(start)
+	Set(start, Add(start, 1))
+	Loop(start, end)
 
-	Print(1)
-	_fib(1,1)
 }
+Loop(0, 50)
 
-PrintText("Hej ""(	)  \"    \"med dig")
-//Print(Pop())
-
-fib()
-
-112
-221
-212
+Print(1000)
 
 
 
@@ -43,16 +32,77 @@ fib()
 
 
 
-
-
-
-
-
-
-
-
-
-
+//def(someNumber)
+//Set(someNumber, 10)
+//
+//
+//if someNumber == 10
+//
+//Print(999)
+//
+//endif
+//PrintText("Hello world")
+//
+//
+//// Loop that counts from 0 to 10
+//def(i)
+//def(x)
+//loop(x)
+//{
+//	if x < 11
+//	Print(x)
+//	Set(x, Add(x))
+//
+//	//endif
+//}
+//
+//undef(x)
+//
+//Print(Rand(0, 10))
+//
+//
+//fib()
+//{
+//	_fib(x,y)
+//	{
+//		Print(y)
+//		//Add(x, y)
+//		Sleep(500)
+//		_fib(y,Add(x,y))
+//	}
+//
+//	Print(1)
+//	_fib(1,1)
+//}
+//
+//PrintText("Hej ""(	)  \"    \"med dig")
+////Print(Pop())
+//
+//fib()
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -85,13 +135,13 @@ fib()
 //
 //Fib()
 //{
-//Push(Get(var1))
-//Push(Get(var2))
+//Push(vr1))
+//Push(vr2))
 //Plus()
 //Set(var3, Pop())
-//Print(Get(var3))
-//Set(var1, Get(var2))
-//Set(var2, Get(var3))
+//Print(vr3))
+//Set(var1, vr2))
+//Set(var2, vr3))
 //Set(var3, 0) // not needed, just for comfort :D
 //Fib() // Do not have an end since we dont have if else ;( yet....    
 //	  # ;)
@@ -106,12 +156,12 @@ fib()
 //
 //AddX(foo)
 //{
-//Print(Get(x))
-//Push(Get(x))
-//Push(Get(foo))
+//Print(x)
+//Push(x)
+//Push(fo))
 //Plus()
 //Set(x, Pop())
-//AddX(Get(x)) // Call Loop Again To Make It Go Around
+//AddX(x) // Call Loop Again To Make It Go Around
 //}
 //
 //AddX(3)
@@ -123,9 +173,9 @@ fib()
 //
 //AddXPrint(para)
 //{
-//Print(Get(x))
-//Push(Get(x))
-//Push(Get(para))
+//Print(x)
+//Push(x)
+//Push(pra))
 //Plus()
 //}
 //
@@ -143,8 +193,8 @@ fib()
 //Set(x, 10)
 //Set(y, 13)
 //
-//Push(Get(x))
-//Push(Get(y))
+//Push(x)
+//Push(y)
 //
 //Minus()
 //Print(Peek())
@@ -155,7 +205,7 @@ fib()
 //
 //AddOne(para)
 //{
-//Push(Get(para))
+//Push(pra))
 //Push(1)
 //Plus()
 //}
@@ -165,8 +215,8 @@ fib()
 //
 //AddOne(para1, para2)
 //{
-//Print(Get(para1))
-//Print(Get(para2))
+//Print(pra1))
+//Print(pra2))
 //}
 //
 //AddOne(3, 5)

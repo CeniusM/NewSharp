@@ -13,7 +13,6 @@ internal class NewSharpIDE
     private bool _justPressedEsc = false;
     private Stopwatch _timeAtPress = new Stopwatch();
 
-
     private List<char> _clipBoard = new List<char>();
     private (int X, int Y) _clipStart;
     private (int X, int Y) _clipEnd;

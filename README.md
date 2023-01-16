@@ -9,12 +9,18 @@ The NS scripting languages contains the following tools
 - Div(): divide the two top stack numbers
 - Minus(): pops the last two values from the stack, subtracts the second popped value from the first, and pushes the result onto the stack
 - Print(x): prints an argument
+- PrintText("This text will be printed"): prints the text inside the ""
+- Clear(): clears the terminal
 - Sleep(x): sleep for the given amount on ms
 - StackCount(): Returns the Stack elements count
 - def(varName); Used to define a varible that can be used later (init to 0)
 - Set(varName, value): sets the value of the variable
-- Get(varName): returns the value of the variable
+- Get(varName): returns the value of the variable or just use the varible name
+- varName: returns the value of the variable
 - undef(varName): undefines the varible 
+- StartTimer(): Start/Restarts the build in stopwatch
+- StopTimer(): Stops the build in stopwatch and pushes the time in miliseconds on top of the stack
+- Rand(low, heigh): Returns a value random number [low, heigh] 
 
 The interpreter also has the ability to skip the rest of a line at ("//", "#" and ";"), which are treated as comments.
 
@@ -50,9 +56,10 @@ You are also able to use if statements
 example
 
 ```
-if (Pop() == 4)
+if Pop() == 4
+{
 Print(4)
-endif
+}
 ```
 
 endif is used to indicate where to stop the scope

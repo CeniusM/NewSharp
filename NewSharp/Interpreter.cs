@@ -1,5 +1,6 @@
 ﻿// Note: Should probely use IEnumerable<char> or StringBuilder for all of this...
 
+using System.Diagnostics;
 using System.Text;
 
 namespace NewSharp;
@@ -21,6 +22,13 @@ public class Interpreter
 
     private List<string> LinesInput = new List<string>();
 
+    private Stopwatch sw = new Stopwatch();
+
+    private Random rand = new Random();
+
+    private bool running = false;
+    public bool Running => running;
+
     public Interpreter()
     {
         BuildIn.Add(("Print", 1, false), __PRINT);
@@ -34,6 +42,33 @@ public class Interpreter
         BuildIn.Add(("StackCount", 0, true), __STACKCOUNT);
         BuildIn.Add(("Sleep", 1, false), __SLEEP);
         BuildIn.Add(("Clear", 0, false), __CLEAR);
+        BuildIn.Add(("StartTimer", 0, false), __STARTTIMER);
+        BuildIn.Add(("StopTimer", 0, false), __STOPTIMER);
+        BuildIn.Add(("Rand", 2, true), __RAND);
+        BuildIn.Add(("ReadKey", 0, true), __READKEY);
+    }
+
+    private int __READKEY(int foo1, int foo2)
+    {
+        return Console.ReadKey().KeyChar;
+    }
+
+    private int __RAND(int var1, int var2)
+    {
+        return rand.Next(var1, var2 + 1);
+    }
+
+    private int __STARTTIMER(int foo1, int foo2)
+    {
+        sw.Restart();
+        return 0;
+    }
+
+    private int __STOPTIMER(int foo1, int foo2)
+    {
+        Stack.Push((int)sw.ElapsedMilliseconds);
+        sw.Stop();
+        return 0;
     }
 
     private int __CLEAR(int foo1, int foo2)
@@ -244,11 +279,12 @@ public class Interpreter
     private void SetErrorIf(bool statement, int lineNum, string lineMessage)
     {
         if (statement)
-            throw new Exception(GetErrorMessage(lineNum, lineMessage));
+            SetError(lineNum, lineMessage);
     }
 
     private void SetError(int lineNum, string lineMessage)
     {
+        running = false;
         throw new Exception(GetErrorMessage(lineNum, lineMessage));
     }
 
@@ -269,12 +305,42 @@ public class Interpreter
         SetErrorIf(!(line.Contains('(') && line.Contains(')')), lineOffSet, "Function does not contain parameters");
         string str = line.Split('(', 2)[1];
         str = str.Remove(str.Length - 1);
-        int commasCount = str.Count(x => x == ',');
+
+        //int commasCount = str.Count(x => x == ',');
+        int commasCount = 0;
+        int parameterDepth = 0; // Tells us if we are inside a depper function parameters
+        int index = -1;
+        for (int i = 0; i < str.Length; i++)
+        {
+            if (str[i] == '(')
+                parameterDepth++;
+            else if (str[i] == ')')
+                parameterDepth--;
+            else if (str[i] == ',' && parameterDepth == 0)
+            {
+                index = i;
+                commasCount++;
+            }
+        }
+
+
         SetErrorIf(commasCount > 1, lineOffSet, "There can not be more than 2 parameters");
+
         //SetErrorIf(commasCount < 0, lineOffSet, "There can not be less than 0 parameters"); // HOW WOULD THIS BE POSSIBLE
         string[] names = new string[0];
         if (splitAtComma)
-            names = str.Split(',');
+        {
+            if (index != -1)
+            {
+                // IM LOSING MY MIND
+                //str[index] = (char)24;
+                // Idc anymore after 900 lines of code, efficiency is my last priority for now
+                StringBuilder tempStr = new StringBuilder(str);
+                tempStr[index] = (char)24;
+                str = tempStr.ToString();
+                names = str.Split((char)24);
+            }
+        }
         else
             names = new string[1] { str };
         if (names.Length == 1)
@@ -377,12 +443,16 @@ public class Interpreter
 
         if (int.TryParse(str1, out int outInt1))
             value1 = outInt1;
+        else if (NameVaribleIndex.ContainsKey(str1))
+            value1 = Varibles[NameVaribleIndex[str1]];
         else
-            SetErrorIf(str1 != "", lineOffSet, "Can not have functions without parameters");
+            SetErrorIf(str1 != "", lineOffSet, "No varible called " + str1);
         if (int.TryParse(str2, out int outInt2))
             value2 = outInt2;
+        else if (NameVaribleIndex.ContainsKey(str2))
+            value2 = Varibles[NameVaribleIndex[str2]];
         else
-            SetErrorIf(str2 != "", lineOffSet, "Can not have functions without parameters");
+            SetErrorIf(str2 != "", lineOffSet, "No varible called " + str2);
 
         if (str2 != "")
             return new int[] { value1, value2 };
@@ -412,22 +482,96 @@ public class Interpreter
     /// Starts at a if statement and ends at an end statement
     /// </summary>
     /// <param name="lines"></param>
-    /// <param name="line"></param>
-    private int IfStatement(List<string> lines, int line)
+    /// <param name="lineNum"></param>
+    private int IfStatement(List<string> lines, int lineNum)
     {
-        int scopeDepth = 0;
-        for (int i = line; i < lines.Count; i++)
+        int scopeLength = 0;
+        int scopeDepth = 0; // Indicates how many { and }we have gone pase
+        bool ended = false;
+        for (int i = lineNum; i < lines.Count; i++)
         {
-
+            if (lines[i].Contains('{'))
+                scopeDepth++;
+            else if (lines[i].Contains('}'))
+            {
+                    scopeDepth--;
+                if (scopeDepth == 0)
+                {
+                    ended = true;
+                    break;
+                }
+            }
+            scopeLength++;
         }
-        return scopeDepth;
-        // if true...
+        SetErrorIf(!ended, lineNum, "The if statement does not have an end");
 
+        string statement = string.Join("", lines[lineNum].TakeLast(lines[lineNum].Length - 2));
+        bool statementIsTrue = false;
 
-        // RunLinesInScope(start to end lines);
+        // Operations
+        bool equalTo = false; // ==
+        bool notEqualTo = false; // !=
+        bool lessThan = false; // <
+        bool moreThan = false; // >
+        int operations = 0;
 
+        // Check if the statement is true
+        if (statement.Contains("=="))
+        {
+            equalTo = true;
+            operations++;
+        }
+        if (statement.Contains("!="))
+        {
+            notEqualTo = true;
+            operations++;
+        }
+        if (statement.Contains("<"))
+        {
+            lessThan = true;
+            operations++;
+        }
+        if (statement.Contains(">"))
+        {
+            moreThan = true;
+            operations++;
+        }
 
-        //end i ++ length either way 
+        SetErrorIf(operations > 1, lineNum, "Can not have more than 1 operator");
+        SetErrorIf(operations < 1, lineNum, "Can not have less than 1 operator");
+
+        if (equalTo)
+        {
+            int[] values = GetValuesFromParameters(statement.Replace("==", ","), lineNum);
+            SetErrorIf(values.Length != 2, lineNum, "Argument error");
+            statementIsTrue = values[0] == values[1];
+        }
+        else if (notEqualTo)
+        {
+            int[] values = GetValuesFromParameters(statement.Replace("!=", ","), lineNum);
+            SetErrorIf(values.Length != 2, lineNum, "Argument error");
+            statementIsTrue = values[0] != values[1];
+        }
+        else if (lessThan)
+        {
+            int[] values = GetValuesFromParameters(statement.Replace("<", ","), lineNum);
+            SetErrorIf(values.Length != 2, lineNum, "Argument error");
+            statementIsTrue = values[0] < values[1];
+        }
+        else if (moreThan)
+        {
+            int[] values = GetValuesFromParameters(statement.Replace(">", ","), lineNum);
+            SetErrorIf(values.Length != 2, lineNum, "Argument error");
+            statementIsTrue = values[0] > values[1];
+        }
+
+        if (statementIsTrue)
+        {
+            var newLines = lines.Take(new Range(lineNum + 1, lineNum + 1 + scopeLength)).ToList();
+            RunLinesInScope(newLines, lineNum + 1, true);
+        }
+
+        return scopeLength;
     }
 
     /// <summary>
@@ -442,11 +586,11 @@ public class Interpreter
         {
             if (lines[i].Length == 0)
                 continue;
+            if (!running)
+                return 0;
             try
             {
                 // Testing
-                if (lines[i] == "Push(Get(var2))")
-                    DEBUG.Print("");
 
                 if (DoesStringContain(lines[i], "if", 0))
                     i += IfStatement(lines, i);
@@ -546,8 +690,9 @@ public class Interpreter
             }
             else
             {
-                SetErrorIf(!NameVaribleIndex.ContainsKey(varName), lineOffSet, $"The varible {varName} does not exist");
-                Varibles[NameVaribleIndex[varName]] = GetValuesFromParameters(parameters[1], lineOffSet)[0];
+                Varibles[NameVaribleIndex[varName]] = RunFunction(parameters[1], lineOffSet, true);
+                //SetErrorIf(!NameVaribleIndex.ContainsKey(varName), lineOffSet, $"The varible {varName} does not exist");
+                //Varibles[NameVaribleIndex[varName]] = GetValuesFromParameters(parameters[1], lineOffSet)[0];
             }
             //else
             //    SetError(lineOffSet, "Invalid number in second parameter");
@@ -570,7 +715,7 @@ public class Interpreter
             SetErrorIf(parameters[0].Length < 2, lineOffSet, "Incorrect parameters, example PrintText(\"Hello world\")");
             SetErrorIf(parameters[0][0] != '\"', lineOffSet, "Incorrect parameters, example PrintText(\"Hello world\")");
             SetErrorIf(parameters[0][parameters[0].Length - 1] != '\"', lineOffSet, "Incorrect parameters, example PrintText(\"Hello world\")");
-            Console.WriteLine(string.Join("",parameters[0].Take(new Range(1, parameters[0].Length - 1))));;
+            Console.WriteLine(string.Join("", parameters[0].Take(new Range(1, parameters[0].Length - 1)))); ;
             return 0;
         }
 
@@ -705,7 +850,7 @@ public class Interpreter
                 {
                     // End
                     NameFunc.Add((Name, str.Length, foundReturn), (FuncLines, lineOffSet + scopeOffSet));
-                    return FuncLines.Count;
+                    return FuncLines.Count - 1;
                 }
             }
             else if (DoesStringContain(lines[i], "return", 0))
@@ -730,13 +875,16 @@ public class Interpreter
     /// </summary>
     public void RunCode(string code)
     {
+        if (running)
+            return;
+        running = true;
         LinesInput.AddRange(GetLines(code));
         code = RemoveEmpty(code);
         List<string> Lines = GetLines(code);
         //Lines = RemoveEmptyLines(Lines); // Dont remove beacous then you cant show errors on the correct line
         Lines = RemoveComments(Lines);
 
-        //DEBUG.Print(Lines);
+        DEBUG.Print(Lines);
 
         RunLinesInScope(Lines, 0, false);
 
@@ -745,8 +893,14 @@ public class Interpreter
         //DEBUG.Print(Stack.Pop() + "");
     }
 
+    public void Stop()
+    {
+        running = false;
+    }
+
     public void Clear()
     {
+        Stop();
         NameFunc.Clear();
         NameVaribleIndex.Clear();
         Varibles.Clear();
