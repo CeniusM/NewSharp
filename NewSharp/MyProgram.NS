@@ -35,11 +35,10 @@ def(y)
 Set(y, has_3_in_a_row(player))
 
 Print(y)
-undef(y)
+//undef(y)
 
 
 Set(player, 0)
-def(y)
 Set(y, has_3_in_a_row(player))
 
 Print(y)

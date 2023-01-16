@@ -24,6 +24,6 @@ catch (Exception)
 
 programRunner.RunCode(code);
 
-Console.ReadLine();
+//Console.ReadLine();
 
 #endif

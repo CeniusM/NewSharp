@@ -500,7 +500,7 @@ public class Interpreter
     /// </summary>
     /// <param name="lines"></param>
     /// <param name="lineNum"></param>
-    private int IfStatement(List<string> lines, int lineNum)
+    private int IfStatement(List<string> lines, int lineNum, int scopeOffSet)
     {
         int scopeLength = 0;
         int scopeDepth = 0; // Indicates how many { and }we have gone pase
@@ -584,8 +584,8 @@ public class Interpreter
 
         if (statementIsTrue)
         {
-            var newLines = lines.Take(new Range(lineNum + 2, lineNum + scopeLength)).ToList();
-            RunLinesInScope(newLines, lineNum + 1, true);
+            var newLines = lines.Take(new Range(lineNum + 2, lineNum + 2 + scopeLength)).ToList();
+            RunLinesInScope(newLines, lineNum + 1 + scopeOffSet, true);
         }
 
         return scopeLength;
@@ -610,7 +610,7 @@ public class Interpreter
                 // Testing
 
                 if (DoesStringContain(lines[i], "if", 0))
-                    i += IfStatement(lines, i);
+                    i += IfStatement(lines, i, linesOffSet + i);
                 else if (string.Join("", lines[i].Take(6)) == "return")
                     return GetValuesFromParameters(string.Join("", lines[i].TakeLast(lines[i].Length - 6)), i)[0];
                 else if (SearchForCurly(lines, i))
@@ -707,6 +707,7 @@ public class Interpreter
             }
             else
             {
+                SetErrorIf(!NameVaribleIndex.ContainsKey(varName), lineOffSet, "The varible " + varName + " does not exist");
                 Varibles[NameVaribleIndex[varName]] = RunFunction(parameters[1], lineOffSet, true);
                 //SetErrorIf(!NameVaribleIndex.ContainsKey(varName), lineOffSet, $"The varible {varName} does not exist");
                 //Varibles[NameVaribleIndex[varName]] = GetValuesFromParameters(parameters[1], lineOffSet)[0];
@@ -735,6 +736,8 @@ public class Interpreter
             Console.WriteLine(string.Join("", parameters[0].Take(new Range(1, parameters[0].Length - 1)))); ;
             return 0;
         }
+        //else if(FuncName == "Print")
+
 
 
         int[] Parameters = GetValuesFromParameters(str[1], lineOffSet);
