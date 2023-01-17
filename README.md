@@ -31,7 +31,7 @@ The NS scripting languages contains the following tools
 - Min(var1, var2): returns Math.Min(var1, var2)
 - Sqrt(var1): returns Math.Sqrt(var1)
 - Pow(var1, var2): returns Math.Pow(var1, var2)
-- Scale(var1, var2): returns Math.Scale(var1, var2)
+- Scale(var1, var2): returns Math.ScaleB(var1, var2)
 
 
 The interpreter also has the ability to skip the rest of a line at ("//", "#" and ";"), which are treated as comments.
