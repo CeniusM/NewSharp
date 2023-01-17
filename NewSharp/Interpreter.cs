@@ -35,6 +35,13 @@ public class Interpreter
 
     public Interpreter()
     {
+        BuildIn.Add(("Abs", 1, true), (x,y) => Math.Abs(x));
+        BuildIn.Add(("Max", 2, true), (x,y) => Math.Max(x,y));
+        BuildIn.Add(("Min", 2, true), (x, y) => Math.Min(x, y));
+        BuildIn.Add(("Sqrt", 1, true), (x, y) => (int)Math.Sqrt(x));
+        BuildIn.Add(("Pow", 2, true), (x, y) => (int)Math.Pow(x, y));
+        BuildIn.Add(("Scale", 2, true), (x, y) => (int)Math.ScaleB(x, y));
+
         BuildIn.Add(("MoveCursor", 2, false), __MOVECURSOR);
         BuildIn.Add(("SetCursor", 2, false), __SETCURSOR);
         BuildIn.Add(("Print", 1, false), __PRINT);

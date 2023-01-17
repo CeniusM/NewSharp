@@ -26,6 +26,13 @@ The NS scripting languages contains the following tools
 - Array1(var1, var2): sets the value of the global array with var1 as index and var2 as the value, the array is a MB with of bytes, Length of 262144 
 - SetCursor(var1, var2): set cursor at given coord (var1:x, var2:y)
 - MoveCursor(var1, var2): move the cursor (var1:x, var2:y) from original coord
+- Abs(var1): returns Math.Abs(var1)
+- Max(var1, var2): returns Math.Max(var1, var2)
+- Min(var1, var2): returns Math.Min(var1, var2)
+- Sqrt(var1): returns Math.Sqrt(var1)
+- Pow(var1, var2): returns Math.Pow(var1, var2)
+- Scale(var1, var2): returns Math.Scale(var1, var2)
+
 
 The interpreter also has the ability to skip the rest of a line at ("//", "#" and ";"), which are treated as comments.
 
