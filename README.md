@@ -61,6 +61,7 @@ PlusVarWithOne(var)
 ```
 
 You are also able to use if statements
+You can use "==", "!=", "<", ">" 
 example
 
 ```
