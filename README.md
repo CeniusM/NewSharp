@@ -1,25 +1,31 @@
 # NewSharp
 The NS scripting languages contains the following tools
 
-- Push(value): pushes the value of x onto the stack
-- Plus():pops the last two values from the stack, adds them together, and pushes the result onto the stack
-- Mul(): multiplies the two top stack numbers
-- Div(): divide the two top stack numbers
-- Minus(): pops the last two values from the stack, subtracts the second popped value from the first, and pushes the result onto the stack
-- Print(x): prints an argument
-- PrintText("This text will be printed"): prints the text inside the ""
+- Plus(var1, var2): returns var1 + var2
+- Mul(var1, var2): returns var1 * var2
+- Minus(var1, var2): returns var1 - var2
+- Div(var1, var2): returns var1 / var2
+- Print(var1): prints the input number
+- PrintLine(var1): prints the input number and a new line
+- PrintText("This text will be printed"): prints the text you put in the "", does not create a new line
+- PrintTextLine("This text will be printed"): prints the text you put in the "", and creates a new line
+- NewLine(): prints new line
 - Clear(): clears the terminal
-- Sleep(x): sleep for the given amount on ms
-- StackCount(): Returns the Stack elements count
-- def(varName); Used to define a varible that can be used later (init to 0)
-- Set(varName, value): sets the value of the variable
-- Get(varName): returns the value of the variable or just use the varible name
-- varName: returns the value of the variable
-- undef(varName): undefines the varible 
-- StartTimer(): Start/Restarts the build in stopwatch
-- StopTimer(): Stops the build in stopwatch and pushes the time in miliseconds on top of the stack
-- Rand(low, heigh): Returns a value random number [low, heigh] 
-- ReadKey(): returns the next client key input
+- Sleep(x): sleeps for x amount of milliseconds
+- def(varName): defines a varible
+- Set(varName, value): sets a varible
+- varnName = value: sets a varible
+- Get(varName): returns a varible value
+- varName: returns a varible value 
+- undef(varName): undefines the varible
+- StartTimer(): starts/restarts an internal timer
+- StopTimer(): returns the time since start and stops the watch, if the timer was not started, it returns -1
+- Rand(low, heigh): random number [low, heigh] 
+- ReadKey(): returns a client key input
+- Array1(var1): returns the value of a global array with var1 as index, the array is a MB with of bytes, Length of 262144 
+- Array1(var1, var2): sets the value of the global array with var1 as index and var2 as the value, the array is a MB with of bytes, Length of 262144 
+- SetCursor(var1, var2): set cursor at given coord (var1:x, var2:y)
+- MoveCursor(var1, var2): move the cursor (var1:x, var2:y) from original coord
 
 The interpreter also has the ability to skip the rest of a line at ("//", "#" and ";"), which are treated as comments.
 
@@ -31,23 +37,19 @@ Note* All functions can have [0,2] parameters with function overloading
 AddOne(var)
 {
     // Example
-    Push(Get(var))
-    Push(1)
-    Plus()
+    var = Plus(var, 1)
+    return
 }
 ```
 
-now if it contains a return statement at the end, it can return a value that other Functions can use
-if it returns a value, it has to be used as a parameter
+Now if it contains a return statement at the end, it can return a value that other Functions can use
+If it returns a value, it has to be used as a parameter
 
 example
 ```
 PlusVarWithOne(var)
 {
-    Push(Get(var))   
-    Push(1)
-    Plus()
-    return Pop()
+    return Plus(var, 1)
 }
 ```
 
@@ -55,23 +57,20 @@ You are also able to use if statements
 example
 
 ```
-if Pop() == 4
+def(i)
+i = 4
+if i == 4
 {
-Print(4)
+PrintText("The given number is ")
+Print(i)
+NewLine()
 }
 ```
-
-endif is used to indicate where to stop the scope
 
 To run the interpreter, simply run the script with a full path in source code because i don't know how to do it any other way :D
 
 
 
 ## Todo
-- [ ] Implement return
-- [ ] Implement if statements
-- [ ] Implement sleep function
-- [ ] Implement Read line to integer
-- [ ] Implement NewLine() and Write(num)
 - [ ] Implement undefine functions and varibles at end of scope
 - [ ] Other than that there is no mistakes *cough
