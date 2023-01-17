@@ -24,8 +24,6 @@ public class Interpreter
 
     //private int[,,] Array3 = new int[64, 64, 64]; // 1 MB worth of 3d ints
 
-    private Stack<int> Stack = new Stack<int>();
-
     private List<string> LinesInput = new List<string>();
 
     private Stopwatch sw = new Stopwatch();
@@ -42,18 +40,14 @@ public class Interpreter
         BuildIn.Add(("Print", 1, false), __PRINT);
         BuildIn.Add(("PrintLine", 1, false), __PRINTLINE);
         BuildIn.Add(("NewLine", 0, false), __NEWLINE);
-        BuildIn.Add(("Pop", 0, true), __POP);
-        BuildIn.Add(("Peek", 0, true), __PEEK);
-        BuildIn.Add(("Push", 1, false), __PUSH);
-        BuildIn.Add(("Plus", 0, false), __PLUS);
-        BuildIn.Add(("Minus", 0, false), __MINUS);
-        BuildIn.Add(("Mul", 0, false), __MUL);
-        BuildIn.Add(("Div", 0, false), __DIV);
-        BuildIn.Add(("StackCount", 0, true), __STACKCOUNT);
+        BuildIn.Add(("Plus", 2, true), __PLUS);
+        BuildIn.Add(("Minus", 2, true), __MINUS);
+        BuildIn.Add(("Mul", 2, true), __MUL);
+        BuildIn.Add(("Div", 2, true), __DIV);
         BuildIn.Add(("Sleep", 1, false), __SLEEP);
         BuildIn.Add(("Clear", 0, false), __CLEAR);
         BuildIn.Add(("StartTimer", 0, false), __STARTTIMER);
-        BuildIn.Add(("StopTimer", 0, false), __STOPTIMER);
+        BuildIn.Add(("StopTimer", 0, true), __STOPTIMER);
         BuildIn.Add(("Rand", 2, true), __RAND);
         BuildIn.Add(("ReadKey", 0, true), __READKEY);
         BuildIn.Add(("Array1", 2, false), __ARRAY1SET);
@@ -109,9 +103,9 @@ public class Interpreter
 
     private int __STOPTIMER(int foo1, int foo2)
     {
-        Stack.Push((int)sw.ElapsedMilliseconds);
+        int var = (int)sw.ElapsedMilliseconds;
         sw.Stop();
-        return 0;
+        return var;
     }
 
     private int __CLEAR(int foo1, int foo2)
@@ -126,25 +120,14 @@ public class Interpreter
         return 0;
     }
 
-    private int __MUL(int foo1, int foo2)
+    private int __MUL(int var1, int var2)
     {
-        int var1 = Stack.Pop();
-        int var2 = Stack.Pop();
-        Stack.Push(var2 * var1);
-        return 0;
+        return var1 * var2;
     }
 
-    private int __DIV(int foo1, int foo2)
+    private int __DIV(int var1, int var2)
     {
-        int var1 = Stack.Pop();
-        int var2 = Stack.Pop();
-        Stack.Push(var2 / var1);
-        return 0;
-    }
-
-    private int __STACKCOUNT(int var1, int foo2)
-    {
-        return Stack.Count;
+        return var1 / var2;
     }
 
     private int __PRINT(int var1, int foo2)
@@ -159,36 +142,14 @@ public class Interpreter
         return 0;
     }
 
-    private int __PUSH(int var1, int foo2)
+    private int __MINUS(int var1, int var2)
     {
-        Stack.Push(var1);
-        return 0;
+        return var1 - var2;
     }
 
-    private int __PEEK(int foo1, int foo2)
+    private int __PLUS(int var1, int var2)
     {
-        return Stack.Peek();
-    }
-
-    private int __POP(int foo1, int foo2)
-    {
-        return Stack.Pop();
-    }
-
-    private int __MINUS(int foo1, int foo2)
-    {
-        int var1 = Stack.Pop();
-        int var2 = Stack.Pop();
-        Stack.Push(var2 - var1);
-        return 0;
-    }
-
-    private int __PLUS(int foo1, int foo2)
-    {
-        int var1 = Stack.Pop();
-        int var2 = Stack.Pop();
-        Stack.Push(var1 + var2);
-        return 0;
+        return var1 + var2;
     }
 
     private bool DoesStringContain(string input, string match, int offset)
@@ -620,6 +581,19 @@ public class Interpreter
         return scopeLength;
     }
 
+    // Can only assign
+    private void AssignVarible(string line, int lineOffSet)
+    {
+        string[] parameters = line.Split('=');
+        string varName = parameters[0];
+        string parameter = parameters[1];
+
+        SetErrorIf(!NameVaribleIndex.ContainsKey(varName), lineOffSet, "Trying to assign a varible that is not defined \"" + varName + "\"");
+        int[] val = GetValuesFromParameters(parameter, lineOffSet);
+        SetErrorIf(val.Length != 1, lineOffSet, "Trying to assign incorrect values");
+        Varibles[NameVaribleIndex[varName]] = val[0];
+    }
+
     /// <summary>
     /// Runs the formatet code line by line. Returns false if it fails
     /// </summary>
@@ -642,6 +616,8 @@ public class Interpreter
 
                 if (DoesStringContain(lines[i], "if", 0))
                     i += IfStatement(lines, i, linesOffSet + i);
+                else if (lines[i].Count(x => x == '=') == 1)
+                    AssignVarible(lines[i], i + linesOffSet);
                 else if (string.Join("", lines[i].Take(6)) == "return")
                 {
                     var temp = GetValuesFromParameters(string.Join("", lines[i].TakeLast(lines[i].Length - 6)), i);
@@ -690,9 +666,9 @@ public class Interpreter
     private void DefVarible(List<string> lines, int lineOffSet, int scopeOffSet)
     {
         string line = lines[lineOffSet];
-        SetErrorIf(line[3] != '(', lineOffSet + scopeOffSet, "Incorrect syntax, must use \"def(name)\"");
+        SetErrorIf(line[3] != '(', lineOffSet + scopeOffSet, "Incorrect syntax, must use \"def name\"");
         string name = string.Join("", line.Take(new Range(4, line.Length - 1)));
-        SetErrorIf(line[3] != '(', lineOffSet + scopeOffSet, "Incorrect syntax, must use \"def(name)\"");
+        SetErrorIf(line[3] != '(', lineOffSet + scopeOffSet, "Incorrect syntax, must use \"def name\"");
 
         ValidateName(name, lineOffSet);
         SetErrorIf(NameVaribleIndex.ContainsKey(name), lineOffSet + scopeOffSet, "Varible has already been defined ");
@@ -982,7 +958,6 @@ public class Interpreter
         NameFunc.Clear();
         NameVaribleIndex.Clear();
         Varibles.Clear();
-        Stack.Clear();
         LinesInput.Clear();
     }
 }
